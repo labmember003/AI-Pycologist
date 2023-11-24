@@ -1,6 +1,7 @@
 package com.falcon.sugam
 
 import android.app.Activity
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -19,8 +20,19 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.ui.AppBarConfiguration
+import com.example.summarizer.retrofit.ApiUtilities
+import com.example.summarizer.retrofit.ChatRequest
 import com.falcon.sugam.databinding.ActivitySummarize2Binding
+import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
 import java.util.*
 
 var url = "http://34.171.182.83/upload"
@@ -116,6 +128,14 @@ class Summarize2Activity : AppCompatActivity() {
         customView.findViewById<TextView>(R.id.tv_bot_message).visibility = View.GONE
         customView.findViewById<TextView>(R.id.tv_message).text =  textValue
         binding.llhehe.addView(customView)
+
+        val onSuccess = { response: String ->
+            sendBotMessage(response)
+        }
+        val onFailure = { response: String ->
+            sendBotMessage(response)
+        }
+        gptResponse("English", textValue, "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", onSuccess, onFailure)
     }
 
     private fun askSpeechInput() {
@@ -131,40 +151,54 @@ class Summarize2Activity : AppCompatActivity() {
         }
     }
 
-    private fun getJson(text: String) {
-        url = "http://34.171.182.83/upload?text=$text&lang=$language"
-        Log.i("cattttt", url)
-        Fuel.get(url)
-            .responseString { _, response, result ->
-                when (result) {
-                    is Result.Success -> {
-                        val responseBody = result.get()
-                        val resultJson = JSONObject(responseBody)
-                        val textValue = resultJson.getString("text")
-                        val idValue = resultJson.getInt("id")
-                        globalidValue = idValue
-                        Log.i("happyhappy", textValue)
-                        Log.i("happyhappyid", idValue.toString())
-//                        Handler(Looper.getMainLooper()).post {
-//                            binding.summarizedText.text = textValue
-//                        }
-                    }
-                    is Result.Failure -> {
-                        val error = result.getException()
-                        Log.i("sexyyyy", error.message.toString())
-                        // Handle the error case
-                        println("Request failed: ${error.message}")
-                    }
-                }
-            }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RQ_SPEECH_RC && resultCode == Activity.RESULT_OK) {
             val result = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
 //            Toast.makeText(this, result?.get(0).toString(), Toast.LENGTH_SHORT).show()
             sendUserMessage(result?.get(0).toString())
+        }
+    }
+
+    private fun gptResponse(
+        language: String?,
+        prompt: String,
+        API_KEY: String,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val requestBody = RequestBody.create(
+            "application/json".toMediaType(),
+            Gson().toJson(
+                ChatRequest(
+                    1000,
+                    "text-davinci-003",
+                    prompt = "Just Act Like a demo Phycologist and answer these questions:  $language: \n$prompt",
+                    0.7
+                )
+            )
+        )
+        Log.i("qwsdrfghjiklp", API_KEY)
+        val contentType = "application/json"
+        val authorization = "Bearer $API_KEY"
+
+        // Coroutine scope for making the HTTP request
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiUtilities.getApiInterface().getChat(
+                    contentType, authorization, requestBody
+                )
+                val textResponse = response.choices.first().text
+                withContext(Dispatchers.Main) {
+                    onSuccess(textResponse)
+                }
+            } catch (e: Exception) {
+                val errorResponse = e.message.toString()
+                Log.i("hapyhapyhapy", errorResponse)
+                withContext(Dispatchers.Main) {
+                    onError(errorResponse)
+                }
+            }
         }
     }
 }
