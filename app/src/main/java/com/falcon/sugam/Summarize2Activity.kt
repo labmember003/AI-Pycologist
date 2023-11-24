@@ -32,7 +32,7 @@ class Summarize2Activity : AppCompatActivity() {
     private lateinit var binding: ActivitySummarize2Binding
     lateinit var tts: TextToSpeech
     var language : String = ""
-
+    var isAudioEnabled = true
     private val RQ_SPEECH_RC = 102
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,13 +43,15 @@ class Summarize2Activity : AppCompatActivity() {
         language = intent.getStringExtra("language") ?: "English"
 
         findViewById<ImageView>(R.id.speakerButton).setOnClickListener {
-            tts = TextToSpeech(this.applicationContext, TextToSpeech.OnInitListener {
-                if (it == TextToSpeech.SUCCESS) {
-                    tts.language = Locale.US
-                    tts.setSpeechRate(1.0f)
-                    tts.speak("cat is my best freind", TextToSpeech.QUEUE_ADD, null)
-                }
-            })
+            if (isAudioEnabled) {
+                isAudioEnabled = !isAudioEnabled
+                findViewById<ImageView>(R.id.speakerButton).setImageResource(R.drawable.mute)
+            } else {
+                isAudioEnabled = !isAudioEnabled
+                findViewById<ImageView>(R.id.speakerButton).setImageResource(R.drawable.speaker)
+            }
+
+
         }
         binding.micButton.setOnClickListener {
             askSpeechInput()
@@ -96,6 +98,15 @@ class Summarize2Activity : AppCompatActivity() {
         customView.findViewById<TextView>(R.id.tv_bot_message).text = textValue
         customView.findViewById<TextView>(R.id.tv_message).visibility = View.GONE
         binding.llhehe.addView(customView)
+        if (isAudioEnabled) {
+            tts = TextToSpeech(this.applicationContext, TextToSpeech.OnInitListener {
+                if (it == TextToSpeech.SUCCESS) {
+                    tts.language = Locale.US
+                    tts.setSpeechRate(1.0f)
+                    tts.speak(textValue, TextToSpeech.QUEUE_ADD, null)
+                }
+            })
+        }
     }
 
     private fun sendUserMessage(textValue: String) {
