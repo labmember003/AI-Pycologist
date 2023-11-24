@@ -70,12 +70,14 @@ class Summarize2Activity : AppCompatActivity() {
             askSpeechInput()
         }
         binding.btnSend.setOnClickListener {
-            val inflater = LayoutInflater.from(this)
-            val customView = inflater.inflate(R.layout.message_item, null)
-            customView.findViewById<TextView>(R.id.tv_message).text = binding.etMessage.text
-            customView.findViewById<TextView>(R.id.tv_bot_message).visibility = View.GONE
-            binding.llhehe.addView(customView)
-            sendFollowUpRequest(binding.etMessage.text.toString())
+//            val inflater = LayoutInflater.from(this)
+//            val customView = inflater.inflate(R.layout.message_item, null)
+//            customView.findViewById<TextView>(R.id.tv_message).text = binding.etMessage.text
+//            customView.findViewById<TextView>(R.id.tv_bot_message).visibility = View.GONE
+//            binding.llhehe.addView(customView)
+//            sendFollowUpRequest(binding.etMessage.text.toString())
+
+            sendUserMessage(binding.etMessage.text.toString())
         }
         sendBotMessage("Hi, I am Mr Karan Sehgal")
     }
