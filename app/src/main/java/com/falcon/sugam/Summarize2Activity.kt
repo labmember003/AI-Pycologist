@@ -137,7 +137,7 @@ class Summarize2Activity : AppCompatActivity() {
         val onFailure = { response: String ->
             sendBotMessage(response)
         }
-        gptResponse("English", textValue, "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", onSuccess, onFailure)
+        gptResponse("English", textValue, "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", onSuccess, onFailure)
     }
 
     private fun askSpeechInput() {
@@ -175,7 +175,7 @@ class Summarize2Activity : AppCompatActivity() {
                 ChatRequest(
                     1000,
                     "text-davinci-003",
-                    prompt = "Just Act Like a demo Phycologist and answer these questions:  $language: \n$prompt",
+                    prompt = "Act Like a demo Ai Psychologist and don't recommend Doctor and medicines , then answer these questions :  $language: \n$prompt",
                     0.7
                 )
             )
