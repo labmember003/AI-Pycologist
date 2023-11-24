@@ -46,6 +46,7 @@ class Summarize2Activity : AppCompatActivity() {
             if (isAudioEnabled) {
                 isAudioEnabled = !isAudioEnabled
                 findViewById<ImageView>(R.id.speakerButton).setImageResource(R.drawable.mute)
+
             } else {
                 isAudioEnabled = !isAudioEnabled
                 findViewById<ImageView>(R.id.speakerButton).setImageResource(R.drawable.speaker)
